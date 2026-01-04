@@ -38,12 +38,25 @@ contract RebaseToken is ERC20, Ownable{
         _mint(_to, _amount);
     }
 
+    function burn(address _from, uint256 _amount) external onlyOwner {
+        if (_amount == type(uint256).max) {
+            _amount = balanceOf(_from);
+        }
+        _mintAccuredInterest(_from);
+        _burn(_from, _amount);
+    }
+
     function balanceOf(address _user) public view override returns (uint256) {
         return super.balanceOf(_user) * _calculateUserAccumulatedInterestSinceUpdate(_user) / PRECISION_FACTOR;
     }
 
     function _mintAccuredInterest(address _user) internal {
-
+        // principle balance
+        uint256 previousBalance = super.balanceOf(_user);
+        uint256 currentBalance = balanceOf(_user);
+        uint256 interest = currentBalance - previousBalance;
+        s_lastTimeUpdated[_user] = block.timestamp;
+        _mint(_user, interest);
     }
 
     function getUserInterestRate(address _user) external returns(uint256) {
@@ -53,7 +66,6 @@ contract RebaseToken is ERC20, Ownable{
     function _calculateUserAccumulatedInterestSinceUpdate(address _user) internal view returns(uint256 linearInterestRate) {
         uint256 timeFromLastUpdate = block.timestamp - s_lastTimeUpdated[_user];
         linearInterestRate = PRECISION_FACTOR + (s_userInterestRate[_user] * timeFromLastUpdate);
-
     }
 
 }
