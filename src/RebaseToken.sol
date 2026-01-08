@@ -8,7 +8,7 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 
 using SafeERC20 for ERC20;
 
-/* 
+/**
 * @title RebaseToken
 * @author Ramil Mustafin
 */
@@ -26,7 +26,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
 
     constructor(address initialOwner) ERC20('Rebase Token', 'RBT') Ownable(initialOwner) {}
 
-    /*
+    /**
     * @notice Grant the mint and burn role to the specified address
     * @param _user The address to grant the mint and burn role to
     */
@@ -34,7 +34,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         _grantRole(MINT_AND_BURN_ROLE, _user);
     }
 
-    /*
+    /**
     * @notice Set the interest rate
     * @param _newInterestRate The new interest rate
     */
@@ -46,7 +46,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         emit InterestRateUpdate(_newInterestRate);
     }
 
-    /*
+    /**
     * @notice Get the principle balance of the specified address, not including the interest earned from the last update
     * @param _user The address to get the principle balance of
     * @return The principle balance of the specified address
@@ -55,7 +55,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         return super.balanceOf(_user);
     }
 
-    /*
+    /**
     * @notice Get the interest rate 
     * @return The interest rate
     */
@@ -63,23 +63,23 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         return s_interestRate;
     }
 
-    /*
+    /**
     * @notice Mint tokens to the specified address
     * @param _to The address to mint tokens to
     * @param _amount The amount of tokens to mint
     */
-    function mint(address _to, uint256 _amount) external hasRole(MINT_AND_BURN_ROLE) {
+    function mint(address _to, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
         _mintAccuredInterest(_to);
         s_userInterestRate[_to] = s_interestRate;
         _mint(_to, _amount);
     }
 
-    /*
+    /**
     * @notice Burn tokens from the specified address
     * @param _from The address to burn tokens from
     * @param _amount The amount of tokens to burn
     */
-    function burn(address _from, uint256 _amount) external hasRole(MINT_AND_BURN_ROLE) {
+    function burn(address _from, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
         if (_amount == type(uint256).max) {
             _amount = balanceOf(_from);
         }
@@ -87,7 +87,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         _burn(_from, _amount);
     }
 
-    /*
+    /**
     * @notice Get the balance of the specified address
     * @param _user The address to get the balance of
     * @return The balance of the specified address
@@ -96,7 +96,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         return super.balanceOf(_user) * _calculateUserAccumulatedInterestSinceUpdate(_user) / PRECISION_FACTOR;
     }
 
-    /*
+    /**
     * @notice Transfer tokens from the specified address
     * @param _to The address to transfer tokens to
     * @param _amount The amount of tokens to transfer
@@ -115,7 +115,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         return super.transfer(_to, _amount);
     }
 
-    /*
+    /**
     * @notice Transfer tokens from the specified address
     * @param _from The address to transfer tokens from
     * @param _to The address to transfer tokens to
@@ -135,7 +135,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         return super.transferFrom(_from, _to, _amount);
     }
 
-    /*
+    /**
     * @notice Mint tokens to the specified address
     * @param _user The address to mint tokens to
     */
@@ -148,7 +148,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         _mint(_user, interest);
     }
 
-    /*
+    /**
     * @notice Get the interest rate of the specified address
     * @param _user The address to get the interest rate of
     * @return The interest rate of the specified address
@@ -157,10 +157,10 @@ contract RebaseToken is ERC20, Ownable, AccessControl{
         return s_userInterestRate[_user];
     }
 
-    /*
+    /**
     * @notice Calculate the accumulated interest since the last update
     * @param _user The address to calculate the accumulated interest for
-    * @return The accumulated interest since the last update
+    * @return linearInterestRate The accumulated interest since the last update
     */
     function _calculateUserAccumulatedInterestSinceUpdate(address _user) internal view returns(uint256 linearInterestRate) {
         uint256 timeFromLastUpdate = block.timestamp - s_lastTimeUpdated[_user];
