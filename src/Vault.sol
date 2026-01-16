@@ -29,6 +29,9 @@ contract Vault is Ownable {
     }
 
     function withdraw(uint256 _amount) external {
+        if (_amount == type(uint256).max) {
+            _amount = i_rebaseToken.balanceOf(msg.sender);
+        }
         if (_amount > i_rebaseToken.balanceOf(msg.sender)) {
             revert Vault_WithdrawAmountExceedsBalance();
         }
