@@ -24,7 +24,8 @@ contract Vault is Ownable {
         if (msg.value == 0) {
             revert Vault_DepositAmountIsZero();
         }
-        i_rebaseToken.mint(msg.sender, msg.value);
+        uint256 interestRate = i_rebaseToken.getInterestRate();
+        i_rebaseToken.mint(msg.sender, msg.value, interestRate);
         emit Deposit(msg.sender, msg.value);
     }
 

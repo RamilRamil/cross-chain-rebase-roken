@@ -10,3 +10,4 @@
 [submodule "lib/ccip"]
 	path = lib/ccip
 	url = https://github.com/smartcontractkit/ccip
+	branch = ccip-develop
